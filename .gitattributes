@@ -1,0 +1,27 @@
+# Line endings
+* text=auto eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.xml text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+
+# Binary
+*.jpg binary
+*.png binary
+*.gif binary
+*.ico binary
+*.svg binary
+
+# Vendored dependencies (GitHub Linguist: exclude from language stats)
+images/pako.min.js linguist-vendored
+
+# Development tools (exclude from language stats)
+preview.html linguist-documentation
+generate-preview.html linguist-documentation
+
+# Diff behavior
+*.css diff=css
+*.html diff=html

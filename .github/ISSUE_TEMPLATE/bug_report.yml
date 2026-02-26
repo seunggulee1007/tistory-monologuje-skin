@@ -1,0 +1,84 @@
+name: "\U0001F41B 버그 리포트"
+description: 버그를 발견하셨나요? 알려주세요.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        버그 리포트를 작성해 주셔서 감사합니다.
+        가능한 자세히 작성해 주시면 빠르게 해결할 수 있습니다.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 버그 설명
+      description: 어떤 버그인지 간단히 설명해 주세요.
+      placeholder: "예: 다크모드에서 코드블록 배경색이 흰색으로 표시됩니다."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 재현 방법
+      description: 버그를 재현할 수 있는 단계를 알려주세요.
+      placeholder: |
+        1. 스킨 설정에서 다크모드를 기본으로 설정
+        2. 코드블록이 포함된 글 열기
+        3. 코드블록 배경이 흰색으로 보임
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대 동작
+      description: 원래 어떻게 동작해야 하나요?
+      placeholder: "예: 다크모드에서 코드블록 배경이 어두운 색상이어야 합니다."
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 스크린샷
+      description: 가능하다면 스크린샷을 첨부해 주세요.
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: 브라우저
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Chrome (Android)
+        - Safari (iOS)
+        - 기타
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: 디바이스
+      options:
+        - 데스크톱
+        - 모바일
+        - 태블릿
+    validations:
+      required: true
+
+  - type: input
+    id: skin-settings
+    attributes:
+      label: 스킨 설정
+      description: 관련 스킨 설정이 있다면 적어주세요.
+      placeholder: "예: 레이아웃=grid, 코드테마=monokai"
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 추가 정보
+      description: 그 외 도움이 될 정보가 있다면 알려주세요.
