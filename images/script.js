@@ -143,6 +143,101 @@
       return '';
     }
 
+    // Correct common hljs auto-detection misidentifications
+    function correctLanguage(codeEl) {
+      // Get the currently detected language from class list
+      var detectedLang = '';
+      var classes = codeEl.className.split(/\s+/);
+      for (var ci = 0; ci < classes.length; ci++) {
+        var lm = classes[ci].match(/^language-(.+)$/);
+        if (lm) { detectedLang = lm[1]; break; }
+      }
+      // Nothing detected yet - nothing to correct
+      if (!detectedLang) return;
+
+      var text = codeEl.textContent;
+      var correctedLang = '';
+
+      // --- Java correction ---
+      // Fires when detected as typescript, javascript, csharp, or similar but code looks like Java
+      if (detectedLang !== 'java') {
+        var javaAnnotations = [
+          '@Override', '@Entity', '@Converter', '@Component', '@Service',
+          '@Repository', '@Autowired', '@Bean', '@Configuration',
+          '@RestController', '@Controller', '@RequestMapping',
+          '@GetMapping', '@PostMapping', '@PutMapping', '@DeleteMapping',
+          '@PathVariable', '@RequestBody', '@Transactional',
+          '@Table', '@Column', '@Id', '@GeneratedValue'
+        ];
+        var javaClassImportPatterns = [
+          /public\s+class\b/, /private\s+class\b/, /\bimplements\b/,
+          /\bextends\b/, /System\.out\b/, /public\s+static\s+void\s+main\b/,
+          /import\s+java\./, /import\s+javax\./, /import\s+org\.springframework\./
+        ];
+        var annotationCount = 0;
+        for (var ai = 0; ai < javaAnnotations.length; ai++) {
+          if (text.indexOf(javaAnnotations[ai]) !== -1) annotationCount++;
+        }
+        var hasClassOrImport = false;
+        for (var pi = 0; pi < javaClassImportPatterns.length; pi++) {
+          if (javaClassImportPatterns[pi].test(text)) { hasClassOrImport = true; break; }
+        }
+        if (annotationCount >= 2 || (annotationCount >= 1 && hasClassOrImport)) {
+          correctedLang = 'java';
+        }
+      }
+
+      // --- Kotlin correction ---
+      // Fires when detected as java (or other) but code has Kotlin-specific keywords
+      if (!correctedLang && detectedLang === 'java') {
+        var kotlinSignals = [
+          /\bfun\s+\w+/, /\bval\s+\w+/, /\bvar\s+\w+\s*:/,
+          /\bdata\s+class\b/, /\bsealed\s+class\b/, /\bobject\s+\w+/,
+          /\bcompanion\s+object\b/, /\bsuspend\s+fun\b/, /\?\.\w+/, /\?:\s*/,
+          /\bit\.\w+/
+        ];
+        var kotlinCount = 0;
+        for (var ki = 0; ki < kotlinSignals.length; ki++) {
+          if (kotlinSignals[ki].test(text)) kotlinCount++;
+        }
+        if (kotlinCount >= 2) {
+          correctedLang = 'kotlin';
+        }
+      }
+
+      // --- Python correction ---
+      // Fires when detected as something else but code has strong Python signals
+      if (!correctedLang && detectedLang !== 'python') {
+        var pythonSignals = [
+          /\bdef\s+\w+\s*\(/, /\bimport\s+\w+/, /\bfrom\s+\w+\s+import\b/,
+          /\bself\.\w+/, /\b__init__\b/, /\bprint\s*\(/, /if\s+__name__\s*==\s*['"]__main__['"]/
+        ];
+        var hasNoBraces = !/\{/.test(text);
+        var pythonCount = 0;
+        for (var pypi = 0; pypi < pythonSignals.length; pypi++) {
+          if (pythonSignals[pypi].test(text)) pythonCount++;
+        }
+        if (pythonCount >= 3 && hasNoBraces) {
+          correctedLang = 'python';
+        }
+      }
+
+      // Apply correction if needed
+      if (correctedLang && correctedLang !== detectedLang) {
+        // Remove old language class and hljs class, then re-highlight
+        var oldClasses = codeEl.className.split(/\s+/);
+        for (var oci = 0; oci < oldClasses.length; oci++) {
+          if (/^language-/.test(oldClasses[oci]) || oldClasses[oci] === 'hljs') {
+            codeEl.classList.remove(oldClasses[oci]);
+          }
+        }
+        codeEl.classList.add('language-' + correctedLang);
+        if (typeof hljs !== 'undefined') {
+          hljs.highlightElement(codeEl);
+        }
+      }
+    }
+
     function run() {
       // Pre-process: set language hints from filename comments before hljs auto-detect
       try {
@@ -164,6 +259,12 @@
             }
           }
           hljs.highlightAll();
+
+          // Post-detection: correct common misidentifications
+          var allCodeBlocks = document.querySelectorAll('pre > code');
+          for (var k = 0; k < allCodeBlocks.length; k++) {
+            correctLanguage(allCodeBlocks[k]);
+          }
         }
       } catch (_) { /* hljs not available */ }
 
