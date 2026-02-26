@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monolog — Preview Generator</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      padding: 52px 32px 96px;
+    }
+
+    /* ── Page header ── */
+    .pg-header {
+      max-width: 1120px;
+      margin: 0 auto 48px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .pg-kicker {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #6366f1;
+      margin-bottom: 6px;
+    }
+    .pg-name {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f0f6fc;
+      letter-spacing: -0.025em;
+    }
+    .pg-desc {
+      font-size: 13px;
+      color: #484f58;
+      margin-top: 5px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    /* ── Generate button ── */
+    .btn-gen {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 13px 26px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 1px rgba(99,102,241,0.5), 0 4px 16px rgba(99,102,241,0.25);
+    }
+    .btn-gen:hover  { background: #4f46e5; transform: translateY(-1px); box-shadow: 0 0 0 1px rgba(79,70,229,0.6), 0 6px 20px rgba(99,102,241,0.35); }
+    .btn-gen:active { transform: translateY(0); }
+    .btn-gen.done   { background: #059669; box-shadow: 0 0 0 1px rgba(5,150,105,0.5), 0 4px 16px rgba(5,150,105,0.25); }
+    .btn-gen.busy   { background: #3730a3; pointer-events: none; opacity: 0.7; }
+    .btn-gen svg    { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* ── Preview grid ── */
+    .pg-grid {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 52px;
+    }
+
+    .pv-item { display: flex; flex-direction: column; gap: 14px; }
+
+    .pv-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pv-fname {
+      font-size: 13px;
+      font-weight: 600;
+      color: #8b949e;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+    }
+    .pv-dims {
+      font-size: 11px;
+      color: #484f58;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-family: monospace;
+    }
+    .pv-ok {
+      font-size: 11px;
+      font-weight: 600;
+      color: #3fb950;
+      opacity: 0;
+      transition: opacity 0.25s;
+      letter-spacing: 0.02em;
+    }
+    .pv-ok.show { opacity: 1; }
+
+    .pv-frame {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #21262d;
+      background: #fff;
+      display: inline-block;
+      box-shadow: 0 0 0 1px #0d1117, 0 8px 32px rgba(0,0,0,0.5);
+      max-width: 100%;
+    }
+    .pv-frame canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .pg-rule {
+      max-width: 1120px;
+      margin: 0 auto;
+      height: 1px;
+      background: #21262d;
+    }
+  </style>
+</head>
+<body>
+
+<div class="pg-header">
+  <div>
+    <div class="pg-kicker">Tistory Skin — Monolog</div>
+    <div class="pg-name">Preview Image Generator</div>
+    <div class="pg-desc">preview1600.jpg &nbsp;·&nbsp; preview560.jpg &nbsp;·&nbsp; preview256.jpg</div>
+  </div>
+  <button class="btn-gen" id="btnGen" onclick="generateAll()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    Generate &amp; Download All
+  </button>
+</div>
+
+<div class="pg-grid">
+
+  <div class="pv-item">
+    <div class="pv-meta">
+      <span class="pv-fname">preview1600.jpg</span>
+      <span class="pv-dims">1600 × 900</span>
+      <span class="pv-ok" id="ok1600">Downloaded</span>
+    </div>
+    <div class="pv-frame">
+      <canvas id="cv1600" width="1600" height="900"></canvas>
+    </div>
+  </div>
+
+  <div class="pg-rule"></div>
+
+  <div class="pv-item">
+    <div class="pv-meta">
+      <span class="pv-fname">preview560.jpg</span>
+      <span class="pv-dims">560 × 560</span>
+      <span class="pv-ok" id="ok560">Downloaded</span>
+    </div>
+    <div class="pv-frame">
+      <canvas id="cv560" width="560" height="560"></canvas>
+    </div>
+  </div>
+
+  <div class="pg-rule"></div>
+
+  <div class="pv-item">
+    <div class="pv-meta">
+      <span class="pv-fname">preview256.jpg</span>
+      <span class="pv-dims">256 × 256</span>
+      <span class="pv-ok" id="ok256">Downloaded</span>
+    </div>
+    <div class="pv-frame">
+      <canvas id="cv256" width="256" height="256"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// Design tokens
+// ════════════════════════════════════════════════════════════════════
+const C = {
+  white:        '#ffffff',
+  bg:           '#f8fafc',
+  bgCard:       '#ffffff',
+  accent:       '#6366f1',
+  accentLight:  '#eef2ff',
+  accentMid:    '#818cf8',
+  slate900:     '#0f172a',
+  slate700:     '#334155',
+  slate600:     '#475569',
+  slate400:     '#94a3b8',
+  slate300:     '#cbd5e1',
+  slate200:     '#e2e8f0',
+  slate100:     '#f1f5f9',
+  slate50:      '#f8fafc',
+};
+
+// Blog post data
+const POSTS = [
+  {
+    cat:     'JavaScript',
+    title:   'React 18 동시성 렌더링 완벽 가이드',
+    date:    '2024.03.15',
+    summary: 'Concurrent Mode, useTransition, Suspense 등 React 18 동시성 기능을 실전 예제와 함께 완전히 이해합니다.',
+  },
+  {
+    cat:     'DevOps',
+    title:   'Docker Compose로 풀스택 개발 환경 구축하기',
+    date:    '2024.03.10',
+    summary: 'Node.js, PostgreSQL, Redis를 Docker Compose 하나로 묶어 팀 전체가 동일한 환경을 공유하는 방법.',
+  },
+  {
+    cat:     'TypeScript',
+    title:   'TypeScript 5.0 데코레이터 완전 분석',
+    date:    '2024.03.05',
+    summary: 'TC39 Stage 3로 안정화된 신규 데코레이터 스펙을 기존 버전과 비교하고 실무 활용법을 탐구합니다.',
+  },
+];
+
+const TAGS = ['React', 'TypeScript', 'Docker', 'Git', 'CI/CD', 'Next.js', 'Node.js', 'GraphQL', 'AWS'];
+
+// ════════════════════════════════════════════════════════════════════
+// Low-level canvas helpers
+// ════════════════════════════════════════════════════════════════════
+
+function font(ctx, weight, px, fam) {
+  fam = fam || "'Pretendard Variable', Pretendard, -apple-system, sans-serif";
+  ctx.font = `${weight} ${px}px ${fam}`;
+}
+
+// Rounded rectangle path (no fill/stroke — caller does that)
+function rrect(ctx, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y,     x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x,     y + h, r);
+  ctx.arcTo(x,     y + h, x,     y,     r);
+  ctx.arcTo(x,     y,     x + w, y,     r);
+  ctx.closePath();
+}
+
+// Horizontal rule
+function hline(ctx, x, y, w, color, lw) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(x, y + 0.5);
+  ctx.lineTo(x + w, y + 0.5);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw || 1;
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Single-line text clipped with ellipsis
+function ellipsis(ctx, text, x, y, maxW) {
+  if (!text) return;
+  if (ctx.measureText(text).width <= maxW) {
+    ctx.fillText(text, x, y);
+    return;
+  }
+  let s = text;
+  while (s.length > 1 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+  ctx.fillText(s + '…', x, y);
+}
+
+// Pill badge (centers text vertically)
+// Returns pill width so callers can chain horizontally
+function pill(ctx, text, x, y, bg, fg, fsize, px, py) {
+  font(ctx, '600', fsize);
+  const tw = ctx.measureText(text).width;
+  const pw = tw + px * 2;
+  const ph = fsize + py * 2;
+  rrect(ctx, x, y, pw, ph, ph / 2);
+  ctx.fillStyle = bg; ctx.fill();
+  ctx.fillStyle = fg;
+  ctx.fillText(text, x + px, y + ph - py - fsize * 0.15);
+  return pw;
+}
+
+// Small placeholder thumbnail rectangle
+function thumb(ctx, x, y, w, h, r) {
+  // base fill
+  rrect(ctx, x, y, w, h, r);
+  const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+  grad.addColorStop(0, '#eef2ff');
+  grad.addColorStop(1, '#f1f5f9');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // subtle image-placeholder icon
+  const cx = x + w / 2, cy = y + h / 2;
+  const iw = Math.min(w * 0.38, 28), ih = iw * 0.7;
+  rrect(ctx, cx - iw / 2, cy - ih / 2, iw, ih, 2);
+  ctx.strokeStyle = C.slate300; ctx.lineWidth = 1.2; ctx.stroke();
+  // mountain lines
+  ctx.beginPath();
+  ctx.moveTo(cx - iw / 2, cy + ih / 2 - 3);
+  ctx.lineTo(cx - iw * 0.15, cy - ih * 0.15);
+  ctx.lineTo(cx + iw * 0.12, cy + ih * 0.1);
+  ctx.lineTo(cx + iw * 0.35, cy - ih * 0.2);
+  ctx.lineTo(cx + iw / 2, cy + ih / 2 - 3);
+  ctx.strokeStyle = C.slate300; ctx.lineWidth = 1; ctx.stroke();
+  // circle (sun)
+  ctx.beginPath();
+  ctx.arc(cx - iw * 0.22, cy - ih * 0.18, iw * 0.1, 0, Math.PI * 2);
+  ctx.strokeStyle = C.slate300; ctx.stroke();
+}
+
+// Drop-shadow helper (draws a soft rect shadow then clips)
+function shadowRect(ctx, x, y, w, h, r, blur, shadowAlpha) {
+  ctx.save();
+  ctx.shadowColor = `rgba(15,23,42,${shadowAlpha || 0.06})`;
+  ctx.shadowBlur  = blur || 8;
+  ctx.shadowOffsetY = 2;
+  rrect(ctx, x, y, w, h, r);
+  ctx.fillStyle = C.bgCard;
+  ctx.fill();
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Component: draw one post card
+//   ctx        — canvas context
+//   x, y       — top-left of card
+//   w          — card width
+//   post       — { cat, title, date, summary }
+//   thumbW     — width of thumbnail (0 = no thumb)
+//   sizes      — { catPx, titlePx, datePx, sumPx, padX, padY, radius }
+// ════════════════════════════════════════════════════════════════════
+function drawCard(ctx, x, y, w, cardH, post, thumbW, s) {
+  const { catPx = 11, titlePx = 15, datePx = 11, sumPx = 12,
+          padX = 20, padY = 16, radius = 10 } = s;
+
+  // Card shadow + bg
+  shadowRect(ctx, x, y, w, cardH, radius, 10, 0.06);
+  rrect(ctx, x, y, w, cardH, radius);
+  ctx.strokeStyle = C.slate200; ctx.lineWidth = 1; ctx.stroke();
+
+  const tx   = x + padX;
+  const tMaxW = w - padX * 2 - (thumbW > 0 ? thumbW + 12 : 0);
+
+  // Category pill
+  const pillH = catPx + 6;
+  const pillY = y + padY;
+  pill(ctx, post.cat, tx, pillY, C.accentLight, C.accent, catPx, 8, 3);
+
+  // Title
+  font(ctx, '700', titlePx);
+  ctx.fillStyle = C.slate900;
+  const titleY = pillY + pillH + titlePx + 4;
+  ellipsis(ctx, post.title, tx, titleY, tMaxW);
+
+  // Date
+  font(ctx, '400', datePx);
+  ctx.fillStyle = C.slate400;
+  const dateY = titleY + datePx + 5;
+  ctx.fillText(post.date, tx, dateY);
+
+  // Summary
+  font(ctx, '400', sumPx);
+  ctx.fillStyle = C.slate600;
+  const sumY = dateY + sumPx + 6;
+  ellipsis(ctx, post.summary, tx, sumY, tMaxW);
+
+  // Thumbnail
+  if (thumbW > 0) {
+    const th = cardH - padY * 2;
+    thumb(ctx, x + w - padX - thumbW, y + padY, thumbW, th, 6);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Render: 1600 × 900 — full layout with sidebar
+// ════════════════════════════════════════════════════════════════════
+function render1600(cv) {
+  const ctx = cv.getContext('2d');
+  const W = 1600, H = 900;
+
+  // Background
+  ctx.fillStyle = C.white;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Top accent bar (5 px) ──────────────────────────────────────
+  ctx.fillStyle = C.accent;
+  ctx.fillRect(0, 0, W, 5);
+
+  // ── Header ────────────────────────────────────────────────────
+  const HH = 64, HY = 5;
+  ctx.fillStyle = C.white;
+  ctx.fillRect(0, HY, W, HH);
+  hline(ctx, 0, HY + HH, W, C.slate200);
+
+  const PAD = 80; // horizontal page margin
+
+  // Logo
+  font(ctx, '700', 21);
+  ctx.fillStyle = C.slate900;
+  ctx.fillText('Monolog', PAD, HY + 36);
+
+  font(ctx, '400', 12);
+  ctx.fillStyle = C.slate400;
+  ctx.fillText('모던 개발자 블로그 스킨', PAD, HY + 52);
+
+  // Nav
+  const NAV = ['Home', '개발', '일상', 'About'];
+  font(ctx, '500', 13);
+  let nx = W - PAD;
+  [...NAV].reverse().forEach((item, i) => {
+    const tw = ctx.measureText(item).width;
+    nx -= tw;
+    ctx.fillStyle = i === NAV.length - 1 ? C.accent : C.slate600;
+    if (i === NAV.length - 1) {
+      // active pill
+      rrect(ctx, nx - 8, HY + 22, tw + 16, 24, 5);
+      ctx.fillStyle = C.accentLight; ctx.fill();
+      ctx.fillStyle = C.accent;
+      font(ctx, '600', 13);
+      ctx.fillText(item, nx, HY + 38);
+      font(ctx, '500', 13);
+    } else {
+      ctx.fillStyle = C.slate600;
+      ctx.fillText(item, nx, HY + 38);
+    }
+    nx -= 28;
+  });
+
+  // ── Main layout ────────────────────────────────────────────────
+  const MAIN_Y = HY + HH + 1;
+  const CONTENT_X = PAD;
+  const SIDEBAR_W = 260;
+  const SIDEBAR_X = W - PAD - SIDEBAR_W;
+  const CONTENT_W = SIDEBAR_X - CONTENT_X - 40;
+
+  // ── Section label ──────────────────────────────────────────────
+  font(ctx, '700', 11);
+  ctx.fillStyle = C.slate400;
+  ctx.fillText('최근 글', CONTENT_X, MAIN_Y + 38);
+  hline(ctx, CONTENT_X, MAIN_Y + 45, CONTENT_W, C.slate200);
+
+  // ── Post cards ────────────────────────────────────────────────
+  const CARD_PAD = { catPx: 11, titlePx: 16, datePx: 11, sumPx: 12.5,
+                     padX: 22, padY: 16, radius: 10 };
+  const THUMB_W = 120;
+  const CARD_H  = 110;
+  let cy = MAIN_Y + 56;
+
+  POSTS.forEach(post => {
+    drawCard(ctx, CONTENT_X, cy, CONTENT_W, CARD_H, post, THUMB_W, CARD_PAD);
+    cy += CARD_H + 12;
+  });
+
+  // ── Sidebar ────────────────────────────────────────────────────
+  const SB_TOP = MAIN_Y + 38;
+
+  // ─ Tag cloud widget ─
+  const tagWidgetH = 198;
+  shadowRect(ctx, SIDEBAR_X, SB_TOP, SIDEBAR_W, tagWidgetH, 10, 8, 0.05);
+  rrect(ctx, SIDEBAR_X, SB_TOP, SIDEBAR_W, tagWidgetH, 10);
+  ctx.strokeStyle = C.slate200; ctx.lineWidth = 1; ctx.stroke();
+
+  font(ctx, '600', 12);
+  ctx.fillStyle = C.slate400;
+  ctx.fillText('태그 클라우드', SIDEBAR_X + 18, SB_TOP + 26);
+  hline(ctx, SIDEBAR_X + 18, SB_TOP + 36, SIDEBAR_W - 36, C.slate200);
+
+  let tagX = SIDEBAR_X + 18, tagY = SB_TOP + 58;
+  font(ctx, '500', 11);
+  TAGS.forEach(tag => {
+    const tw = ctx.measureText(tag).width;
+    const pw = tw + 14;
+    if (tagX + pw > SIDEBAR_X + SIDEBAR_W - 18) {
+      tagX = SIDEBAR_X + 18; tagY += 28;
+    }
+    rrect(ctx, tagX, tagY - 14, pw, 22, 4);
+    ctx.fillStyle = C.slate50; ctx.fill();
+    ctx.strokeStyle = C.slate200; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = C.slate600;
+    ctx.fillText(tag, tagX + 7, tagY);
+    tagX += pw + 6;
+  });
+
+  // ─ Recent posts widget ─
+  const SB2_TOP = SB_TOP + tagWidgetH + 14;
+  const recentTitles = [
+    'React 18 동시성 렌더링 완벽 가이드',
+    'Docker Compose로 개발 환경 구축하기',
+    'TypeScript 5.0 데코레이터 완전 분석',
+    '개발자로 3년, 회고와 앞으로의 방향',
+    'GitHub Actions CI/CD 파이프라인',
+  ];
+  const ITEM_H = 40;
+  const sbW2H  = 52 + recentTitles.length * ITEM_H + 8;
+
+  shadowRect(ctx, SIDEBAR_X, SB2_TOP, SIDEBAR_W, sbW2H, 10, 8, 0.05);
+  rrect(ctx, SIDEBAR_X, SB2_TOP, SIDEBAR_W, sbW2H, 10);
+  ctx.strokeStyle = C.slate200; ctx.lineWidth = 1; ctx.stroke();
+
+  font(ctx, '600', 12);
+  ctx.fillStyle = C.slate400;
+  ctx.fillText('최근 글', SIDEBAR_X + 18, SB2_TOP + 26);
+  hline(ctx, SIDEBAR_X + 18, SB2_TOP + 36, SIDEBAR_W - 36, C.slate200);
+
+  recentTitles.forEach((t, i) => {
+    const iy = SB2_TOP + 52 + i * ITEM_H;
+    // dot
+    ctx.beginPath();
+    ctx.arc(SIDEBAR_X + 24, iy - 3, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = C.accent; ctx.fill();
+    // title
+    font(ctx, '500', 12);
+    ctx.fillStyle = C.slate700;
+    ellipsis(ctx, t, SIDEBAR_X + 34, iy, SIDEBAR_W - 52);
+    // date
+    const DATES = ['2024.03.15','2024.03.10','2024.03.05','2024.02.28','2024.02.20'];
+    font(ctx, '400', 10);
+    ctx.fillStyle = C.slate400;
+    ctx.fillText(DATES[i], SIDEBAR_X + 34, iy + 14);
+  });
+
+  // ── Footer ────────────────────────────────────────────────────
+  const FOOTER_Y = H - 40;
+  hline(ctx, 0, FOOTER_Y, W, C.slate200);
+  ctx.fillStyle = C.slate50;
+  ctx.fillRect(0, FOOTER_Y, W, 40);
+  font(ctx, '400', 11);
+  ctx.fillStyle = C.slate400;
+  ctx.textAlign = 'center';
+  ctx.fillText('Powered by Tistory  ·  © 2024 Monolog  ·  모던 개발자 블로그 스킨', W / 2, FOOTER_Y + 24);
+  ctx.textAlign = 'left';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Render: 560 × 560 — no sidebar, 3 cards
+// ════════════════════════════════════════════════════════════════════
+function render560(cv) {
+  const ctx = cv.getContext('2d');
+  const W = 560, H = 560;
+
+  ctx.fillStyle = C.white;
+  ctx.fillRect(0, 0, W, H);
+
+  // Accent bar
+  ctx.fillStyle = C.accent;
+  ctx.fillRect(0, 0, W, 4);
+
+  // Header
+  const HH = 52, HY = 4;
+  ctx.fillStyle = C.white;
+  ctx.fillRect(0, HY, W, HH);
+  hline(ctx, 0, HY + HH, W, C.slate200);
+
+  const PAD = 28;
+
+  font(ctx, '700', 17);
+  ctx.fillStyle = C.slate900;
+  ctx.fillText('Monolog', PAD, HY + 28);
+
+  font(ctx, '400', 10);
+  ctx.fillStyle = C.slate400;
+  ctx.fillText('모던 개발자 블로그 스킨', PAD, HY + 44);
+
+  // Nav
+  const NAV2 = ['Home', '개발', '일상', 'About'];
+  font(ctx, '500', 11.5);
+  let nx = W - PAD;
+  [...NAV2].reverse().forEach((item, i) => {
+    const tw = ctx.measureText(item).width;
+    nx -= tw;
+    ctx.fillStyle = i === NAV2.length - 1 ? C.accent : C.slate600;
+    ctx.fillText(item, nx, HY + 32);
+    nx -= 18;
+  });
+
+  // Section label
+  const MAIN_Y = HY + HH + 1;
+  font(ctx, '700', 10);
+  ctx.fillStyle = C.slate400;
+  ctx.fillText('최근 글', PAD, MAIN_Y + 28);
+  hline(ctx, PAD, MAIN_Y + 35, W - PAD * 2, C.slate200);
+
+  // Cards
+  const THUMB_W = 90;
+  const CARD_H  = 96;
+  const CW = W - PAD * 2;
+  const SIZES = { catPx: 10, titlePx: 13.5, datePx: 10, sumPx: 11,
+                  padX: 16, padY: 13, radius: 8 };
+  let cy = MAIN_Y + 46;
+
+  POSTS.slice(0, 2).forEach(post => {
+    drawCard(ctx, PAD, cy, CW, CARD_H, post, THUMB_W, SIZES);
+    cy += CARD_H + 10;
+  });
+
+  // Third card (no thumb, slightly shorter)
+  const P3 = POSTS[2];
+  const C3H = 88;
+  drawCard(ctx, PAD, cy, CW, C3H, P3, 0,
+    { catPx: 10, titlePx: 13.5, datePx: 10, sumPx: 11, padX: 16, padY: 12, radius: 8 });
+
+  // Footer
+  const FY = H - 28;
+  hline(ctx, 0, FY, W, C.slate200);
+  ctx.fillStyle = C.slate50;
+  ctx.fillRect(0, FY, W, 28);
+  font(ctx, '400', 10);
+  ctx.fillStyle = C.slate400;
+  ctx.textAlign = 'center';
+  ctx.fillText('Powered by Tistory', W / 2, FY + 18);
+  ctx.textAlign = 'left';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Render: 256 × 256 — compact, header + 2 cards
+// ════════════════════════════════════════════════════════════════════
+function render256(cv) {
+  const ctx = cv.getContext('2d');
+  const W = 256, H = 256;
+
+  ctx.fillStyle = C.white;
+  ctx.fillRect(0, 0, W, H);
+
+  // Accent bar
+  ctx.fillStyle = C.accent;
+  ctx.fillRect(0, 0, W, 3);
+
+  // Header
+  const HH = 40, HY = 3;
+  ctx.fillStyle = C.white;
+  ctx.fillRect(0, HY, W, HH);
+  hline(ctx, 0, HY + HH, W, C.slate200);
+
+  const PAD = 14;
+
+  font(ctx, '700', 13);
+  ctx.fillStyle = C.slate900;
+  ctx.fillText('Monolog', PAD, HY + 20);
+
+  font(ctx, '400', 8.5);
+  ctx.fillStyle = C.slate400;
+  ctx.fillText('모던 개발자 블로그 스킨', PAD, HY + 34);
+
+  // Nav
+  font(ctx, '500', 9.5);
+  let nx = W - PAD;
+  [...['Home','개발','About']].reverse().forEach((item, i) => {
+    const tw = ctx.measureText(item).width;
+    nx -= tw;
+    ctx.fillStyle = i === 2 ? C.accent : C.slate600;
+    ctx.fillText(item, nx, HY + 24);
+    nx -= 12;
+  });
+
+  // Section label
+  const MAIN_Y = HY + HH + 1;
+  font(ctx, '700', 8.5);
+  ctx.fillStyle = C.slate400;
+  ctx.fillText('최근 글', PAD, MAIN_Y + 18);
+  hline(ctx, PAD, MAIN_Y + 22, W - PAD * 2, C.slate200);
+
+  // Cards
+  const CARD_H = 74;
+  const CW = W - PAD * 2;
+  const SIZES = { catPx: 8, titlePx: 10.5, datePx: 8.5, sumPx: 9,
+                  padX: 10, padY: 10, radius: 6 };
+  let cy = MAIN_Y + 30;
+
+  POSTS.slice(0, 2).forEach(post => {
+    drawCard(ctx, PAD, cy, CW, CARD_H, post, 0, SIZES);
+    cy += CARD_H + 8;
+  });
+
+  // Footer
+  const FY = H - 20;
+  hline(ctx, 0, FY, W, C.slate200);
+  ctx.fillStyle = C.slate50;
+  ctx.fillRect(0, FY, W, 20);
+  font(ctx, '400', 8);
+  ctx.fillStyle = C.slate400;
+  ctx.textAlign = 'center';
+  ctx.fillText('Powered by Tistory', W / 2, FY + 13);
+  ctx.textAlign = 'left';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Font load + download helpers
+// ════════════════════════════════════════════════════════════════════
+async function waitFonts() {
+  const families = [
+    '700 20px "Pretendard Variable"',
+    '400 14px "Pretendard Variable"',
+    '600 12px "Pretendard Variable"',
+    '500 13px "Pretendard Variable"',
+  ];
+  await Promise.all(families.map(f => document.fonts.load(f).catch(() => {})));
+  if (document.fonts.ready) await document.fonts.ready;
+  // Extra tick so layout settles
+  await new Promise(r => setTimeout(r, 100));
+}
+
+function dlCanvas(cv, fname) {
+  const url = cv.toDataURL('image/jpeg', 0.92);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function tick(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ════════════════════════════════════════════════════════════════════
+// Public entry points
+// ════════════════════════════════════════════════════════════════════
+async function renderAll() {
+  await waitFonts();
+  render1600(document.getElementById('cv1600'));
+  render560(document.getElementById('cv560'));
+  render256(document.getElementById('cv256'));
+}
+
+async function generateAll() {
+  const btn = document.getElementById('btnGen');
+  btn.classList.add('busy');
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+    stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+  </svg> Rendering…`;
+
+  await waitFonts();
+
+  const tasks = [
+    { id: '1600', render: render1600, fname: 'preview1600.jpg' },
+    { id: '560',  render: render560,  fname: 'preview560.jpg'  },
+    { id: '256',  render: render256,  fname: 'preview256.jpg'  },
+  ];
+
+  for (const t of tasks) {
+    const cv = document.getElementById('cv' + t.id);
+    t.render(cv);
+    await tick(80);
+    dlCanvas(cv, t.fname);
+    document.getElementById('ok' + t.id).classList.add('show');
+    await tick(160);
+  }
+
+  btn.classList.remove('busy');
+  btn.classList.add('done');
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+    stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg> All Downloaded`;
+}
+
+// Render on load (no download)
+document.addEventListener('DOMContentLoaded', renderAll);
+</script>
+
+</body>
+</html>
