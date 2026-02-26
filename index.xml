@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<skin>
+  <information>
+    <name>Monolog</name>
+    <version>1.0.0</version>
+    <description>모던 개발자 블로그 스킨 - 다크모드, PlantUML, 코드 하이라이팅</description>
+    <author>Monolog</author>
+  </information>
+
+  <variables>
+    <variable>
+      <name>accent_color</name>
+      <label>블로그 강조 색상</label>
+      <type>COLOR</type>
+      <default>#6366f1</default>
+      <description>블로그 강조 색상</description>
+    </variable>
+
+    <variable>
+      <name>dark_mode_default</name>
+      <label>기본 다크모드 여부</label>
+      <type>BOOL</type>
+      <default>false</default>
+      <description>기본 다크모드 여부</description>
+    </variable>
+
+    <variable>
+      <name>font_family</name>
+      <label>본문 폰트</label>
+      <type>SELECT</type>
+      <default>Pretendard</default>
+      <description>본문에 사용할 폰트</description>
+      <options>
+        <option>Pretendard</option>
+        <option>Noto Sans KR</option>
+        <option>IBM Plex Sans KR</option>
+      </options>
+    </variable>
+
+    <variable>
+      <name>code_font</name>
+      <label>코드 폰트</label>
+      <type>SELECT</type>
+      <default>JetBrains Mono</default>
+      <description>코드 블록에 사용할 폰트</description>
+      <options>
+        <option>JetBrains Mono</option>
+        <option>Fira Code</option>
+        <option>Source Code Pro</option>
+      </options>
+    </variable>
+
+    <variable>
+      <name>layout_style</name>
+      <label>글 목록 스타일</label>
+      <type>SELECT</type>
+      <default>list</default>
+      <description>글 목록 스타일</description>
+      <options>
+        <option>list</option>
+        <option>grid</option>
+      </options>
+    </variable>
+
+    <variable>
+      <name>show_sidebar</name>
+      <label>사이드바 표시</label>
+      <type>BOOL</type>
+      <default>true</default>
+      <description>사이드바 표시</description>
+    </variable>
+
+    <variable>
+      <name>show_toc</name>
+      <label>목차 표시</label>
+      <type>BOOL</type>
+      <default>true</default>
+      <description>목차 표시</description>
+    </variable>
+
+    <variable>
+      <name>enable_plantuml</name>
+      <label>PlantUML 렌더링</label>
+      <type>BOOL</type>
+      <default>true</default>
+      <description>PlantUML 렌더링</description>
+    </variable>
+
+    <variable>
+      <name>code_theme</name>
+      <label>코드 하이라이팅 테마</label>
+      <type>SELECT</type>
+      <default>github</default>
+      <description>코드 하이라이팅 테마</description>
+      <options>
+        <option>github</option>
+        <option>atom-one</option>
+        <option>monokai</option>
+      </options>
+    </variable>
+
+    <variable>
+      <name>cover_image</name>
+      <label>커버 이미지</label>
+      <type>IMAGE</type>
+      <default></default>
+      <description>커버 이미지</description>
+    </variable>
+
+    <variable>
+      <name>subtitle</name>
+      <label>블로그 부제</label>
+      <type>STRING</type>
+      <default>개발과 일상을 기록합니다</default>
+      <description>블로그 부제</description>
+    </variable>
+  </variables>
+
+  <default>
+    <cover>
+      <item>
+        <title>Monolog</title>
+        <description>모던 개발자 블로그 스킨 - 다크모드, PlantUML, 코드 하이라이팅</description>
+      </item>
+    </cover>
+  </default>
+</skin>
