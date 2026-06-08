@@ -143,6 +143,18 @@
              ARTICLE LOOP (s_article_rep wraps both index and permalink)
              ====================================================== -->
         <div class="post-list">
+          <s_notice_rep>
+            <article class="post-card notice">
+              <div class="post-info">
+                <span class="notice-badge">공지</span>
+                <h2 class="post-title">
+                  <a href="[##_notice_rep_link_##]">[##_notice_rep_title_##]</a>
+                </h2>
+                <time class="post-date" datetime="[##_notice_rep_date_##]">[##_notice_rep_date_##]</time>
+              </div>
+            </article>
+          </s_notice_rep>
+
           <s_article_rep>
             <s_index_article_rep>
               <article class="post-card">
@@ -230,27 +242,86 @@
 
                 <!-- Comments -->
                 <section class="comments-section" id="comments">
-                  [##_article_rep_response_##]
+                  <s_rp>
+                    <h3 class="comments-title">댓글 <span class="comments-count">[##_rp_count_##]</span></h3>
+
+                    <s_rp_container>
+                      <div class="comment-list">
+                        <s_rp_rep>
+                          <div class="comment-item [##_rp_rep_class_##]" id="[##_rp_rep_id_##]">
+                            <div class="comment-inner">
+                              <img src="[##_rp_rep_logo_##]" class="comment-avatar" alt="">
+                              <div class="comment-content">
+                                <div class="comment-header">
+                                  <span class="comment-author">[##_rp_rep_name_##]</span>
+                                  <time class="comment-date">[##_rp_rep_date_##]</time>
+                                </div>
+                                <div class="comment-body">[##_rp_rep_desc_##]</div>
+                                <div class="comment-actions">
+                                  <button type="button" onclick="[##_rp_rep_onclick_reply_##]">답글</button>
+                                  <s_rp_rep_admin>
+                                    <button type="button" onclick="[##_rp_rep_onclick_delete_##]">삭제</button>
+                                  </s_rp_rep_admin>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Nested replies -->
+                            <s_rp2_container>
+                              <div class="reply-list">
+                                <s_rp2_rep>
+                                  <div class="comment-item comment-reply [##_rp_rep_class_##]" id="[##_rp_rep_id_##]">
+                                    <div class="comment-inner">
+                                      <img src="[##_rp_rep_logo_##]" class="comment-avatar" alt="">
+                                      <div class="comment-content">
+                                        <div class="comment-header">
+                                          <span class="comment-author">[##_rp_rep_name_##]</span>
+                                          <time class="comment-date">[##_rp_rep_date_##]</time>
+                                        </div>
+                                        <div class="comment-body">[##_rp_rep_desc_##]</div>
+                                        <div class="comment-actions">
+                                          <s_rp_rep_admin>
+                                            <button type="button" onclick="[##_rp_rep_onclick_delete_##]">삭제</button>
+                                          </s_rp_rep_admin>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </s_rp2_rep>
+                              </div>
+                            </s_rp2_container>
+                          </div>
+                        </s_rp_rep>
+                      </div>
+                    </s_rp_container>
+
+                    <!-- Comment input form -->
+                    <s_rp_input_form>
+                      <div class="comment-form">
+                        <s_rp_guest>
+                          <div class="form-row">
+                            <input type="text" name="[##_rp_input_name_##]" id="[##_rp_input_name_##]" placeholder="이름" value="[##_guest_name_##]">
+                            <input type="password" name="[##_rp_input_password_##]" id="[##_rp_input_password_##]" placeholder="비밀번호">
+                          </div>
+                        </s_rp_guest>
+                        <textarea name="[##_rp_input_comment_##]" id="[##_rp_input_comment_##]" rows="4" placeholder="댓글을 입력하세요"></textarea>
+                        <div class="comment-form-footer">
+                          <s_rp_member>
+                            <label class="secret-check">
+                              <input type="checkbox" name="[##_rp_input_is_secret_##]" id="[##_rp_input_is_secret_##]">
+                              <span>비밀글</span>
+                            </label>
+                          </s_rp_member>
+                          <button type="submit" class="btn-submit" onclick="[##_rp_onclick_submit_##]">등록</button>
+                        </div>
+                      </div>
+                    </s_rp_input_form>
+                  </s_rp>
                 </section>
               </article>
             </s_permalink_article_rep>
           </s_article_rep>
         </div>
-
-        <!-- ======================================================
-             NOTICE
-             ====================================================== -->
-        <s_notice_rep>
-          <article class="post-card notice">
-            <div class="post-info">
-              <span class="notice-badge">공지</span>
-              <h2 class="post-title">
-                <a href="[##_notice_rep_link_##]">[##_notice_rep_title_##]</a>
-              </h2>
-              <time class="post-date" datetime="[##_notice_rep_date_##]">[##_notice_rep_date_##]</time>
-            </div>
-          </article>
-        </s_notice_rep>
 
         <!-- ======================================================
              PROTECTED POST
@@ -268,51 +339,6 @@
             </form>
           </div>
         </s_article_protected>
-
-        <!-- ======================================================
-             COMMENT BLOCK (included via [##_article_rep_response_##])
-             ====================================================== -->
-        <s_rp>
-          <div class="comment-list">
-            <h3 class="comments-title">댓글 [##_rp_count_##]</h3>
-
-            <s_rp_rep>
-              <div class="comment-item [##_rp_rep_class_##]" id="[##_rp_rep_id_##]">
-                <div class="comment-header">
-                  <span class="comment-author">[##_rp_rep_name_##]</span>
-                  <time class="comment-date">[##_rp_rep_date_##]</time>
-                </div>
-                <div class="comment-body">[##_rp_rep_desc_##]</div>
-                <div class="comment-actions">
-                  <button type="button" onclick="[##_rp_rep_onclick_reply_##]">답글</button>
-                  <s_rp_rep_admin>
-                    <button type="button" onclick="[##_rp_rep_onclick_delete_##]">삭제</button>
-                  </s_rp_rep_admin>
-                </div>
-              </div>
-            </s_rp_rep>
-          </div>
-
-          <!-- Comment input form -->
-          <div class="comment-form">
-            [##_rp_input_form_##]
-            <s_rp_guest>
-              <div class="form-row">
-                <input type="text" name="name" placeholder="이름" value="[##_rp_input_name_##]">
-                <input type="password" name="password" placeholder="비밀번호" value="[##_rp_input_password_##]">
-              </div>
-            </s_rp_guest>
-            <textarea name="comment" rows="4" placeholder="댓글을 입력하세요">[##_rp_input_comment_##]</textarea>
-            <div class="form-row">
-              <label>
-                <input type="checkbox" name="secret" [##_rp_input_is_secret_##]>
-                <span>비밀글</span>
-              </label>
-              <button type="submit" class="btn-submit">[##_rp_input_submit_##]</button>
-            </div>
-            [##_rp_input_form_##]
-          </div>
-        </s_rp>
 
         <!-- ======================================================
              GUESTBOOK
@@ -352,8 +378,8 @@
             </div>
 
             <!-- Guestbook write form -->
+            [##_guestbook_input_form_##]
             <div class="guestbook-form">
-              [##_guestbook_input_form_##]
               <div class="form-row">
                 <input type="text" name="name" placeholder="이름" value="[##_guestbook_input_name_##]">
                 <input type="password" name="password" placeholder="비밀번호" value="[##_guestbook_input_password_##]">
@@ -367,8 +393,8 @@
                 </label>
                 <button type="submit" class="btn-submit">등록</button>
               </div>
-              [##_guestbook_input_form_##]
             </div>
+            [##_guestbook_input_form_##]
           </div>
         </s_guestbook_rep>
 
@@ -377,15 +403,15 @@
              ====================================================== -->
         <s_paging>
           <nav class="pagination" aria-label="페이지 내비게이션">
-            <a [##_prev_page_##] class="prev" aria-label="이전 페이지">
+            <a [##_prev_page_##] class="prev [##_no_more_prev_##]" aria-label="이전 페이지">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
             </a>
             <s_paging_rep>
-              <a [##_paging_rep_link_##] class="[##_paging_rep_class_##]">[##_paging_rep_num_##]</a>
+              <a [##_paging_rep_link_##] class="num">[##_paging_rep_link_num_##]</a>
             </s_paging_rep>
-            <a [##_next_page_##] class="next" aria-label="다음 페이지">
+            <a [##_next_page_##] class="next [##_no_more_next_##]" aria-label="다음 페이지">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="9 18 15 12 9 6"></polyline>
               </svg>
@@ -421,7 +447,7 @@
   <!-- ============================================================
        SEARCH OVERLAY
        ============================================================ -->
-  <div class="search-overlay" data-search-overlay aria-hidden="true" role="dialog" aria-label="검색">
+  <div class="search-overlay" data-search-overlay aria-hidden="true" role="dialog" aria-modal="true" aria-label="검색">
     <div class="search-container">
       <button type="button" class="search-close" data-action="close-search" aria-label="검색 닫기">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -443,7 +469,7 @@
   <!-- ============================================================
        IMAGE LIGHTBOX
        ============================================================ -->
-  <div class="lightbox" data-lightbox aria-hidden="true" role="dialog" aria-label="이미지 확대">
+  <div class="lightbox" data-lightbox aria-hidden="true" role="dialog" aria-modal="true" aria-label="이미지 확대">
     <button type="button" class="lightbox-close" aria-label="닫기">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -456,7 +482,7 @@
   <!-- ============================================================
        KEYBOARD SHORTCUTS
        ============================================================ -->
-  <div class="kbd-overlay" data-kbd-overlay aria-hidden="true" role="dialog" aria-label="키보드 단축키">
+  <div class="kbd-overlay" data-kbd-overlay aria-hidden="true" role="dialog" aria-modal="true" aria-label="키보드 단축키">
     <div class="kbd-inner">
       <h3>키보드 단축키</h3>
       <div class="kbd-grid">

@@ -29,6 +29,7 @@
   --accent: #6366f1;
   --accent-hover: #4f46e5;
   --accent-light: #eef2ff;
+  --color-success: #22c55e;
 
   /* Code */
   --code-bg: #f8fafc;
@@ -71,6 +72,7 @@ html.dark {
   --accent: #818cf8;
   --accent-hover: #6366f1;
   --accent-light: #1e1b4b;
+  --color-success: #4ade80;
 
   --code-bg: #1e293b;
   --code-border: #334155;
@@ -158,6 +160,11 @@ textarea {
 
 body.no-scroll {
   overflow: hidden;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 
@@ -520,6 +527,7 @@ main > .container {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   overflow: hidden;
+  cursor: pointer;
   transition: box-shadow var(--transition-base),
     border-color var(--transition-base),
     transform var(--transition-base);
@@ -570,6 +578,7 @@ main > .container {
   margin-bottom: 0.625rem;
   width: fit-content;
   text-decoration: none;
+  transition: background-color var(--transition-base);
 }
 
 .post-card .post-category:hover {
@@ -610,6 +619,7 @@ main > .container {
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin-top: auto;
+  margin-bottom: 0;
 }
 
 
@@ -814,13 +824,21 @@ main > .container {
   text-decoration: none;
 }
 
+.table-wrap {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-wrap table {
+  margin: 0;
+}
+
 .post-content table {
   width: 100%;
   border-collapse: collapse;
   margin: 1.5rem 0;
   font-size: 0.9375rem;
-  overflow-x: auto;
-  display: block;
 }
 
 .post-content thead th {
@@ -1015,7 +1033,7 @@ pre code {
 }
 
 .copy-success {
-  color: #22c55e;
+  color: var(--color-success);
 }
 
 .copy-success svg {
@@ -1281,6 +1299,7 @@ pre code::-webkit-scrollbar-thumb:hover {
    13. Comments
    -------------------------------------------------------------------------- */
 
+/* Comment section */
 .comments-section {
   margin-top: 3rem;
   padding-top: 2rem;
@@ -1293,10 +1312,15 @@ pre code::-webkit-scrollbar-thumb:hover {
   margin-bottom: 1.5rem;
 }
 
+.comments-count {
+  color: var(--accent);
+}
+
 .comment-list {
   list-style: none;
 }
 
+/* Comment item */
 .comment-item {
   padding: 1.25rem 0;
   border-bottom: 1px solid var(--border-color);
@@ -1306,11 +1330,33 @@ pre code::-webkit-scrollbar-thumb:hover {
   border-bottom: none;
 }
 
+/* Layout: avatar + content side by side */
+.comment-inner {
+  display: flex;
+  gap: 0.875rem;
+}
+
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background-color: var(--bg-tertiary);
+}
+
+.comment-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Comment header */
 .comment-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+  flex-wrap: wrap;
 }
 
 .comment-author {
@@ -1319,15 +1365,61 @@ pre code::-webkit-scrollbar-thumb:hover {
   color: var(--text-primary);
 }
 
+.comment-author a {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.comment-author a:hover {
+  color: var(--accent);
+}
+
+/* Tistory profile link badge */
+.comment-header .profileLink,
+.comment-header a[class*="profile"] {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.0625rem 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.comment-header .profileLink:hover,
+.comment-header a[class*="profile"]:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 .comment-date {
   font-size: 0.8125rem;
   color: var(--text-tertiary);
 }
 
+/* Tistory report link */
+.comment-header .tt_txt_report,
+.comment-header a[onclick*="report"] {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  margin-left: auto;
+}
+
+.comment-header .tt_txt_report:hover,
+.comment-header a[onclick*="report"]:hover {
+  color: var(--accent);
+}
+
+/* Comment body */
 .comment-body {
   font-size: 0.9375rem;
   color: var(--text-secondary);
   line-height: 1.7;
+  word-break: break-word;
 }
 
 .comment-body p {
@@ -1338,32 +1430,93 @@ pre code::-webkit-scrollbar-thumb:hover {
   margin-bottom: 0;
 }
 
+/* Comment actions */
 .comment-actions {
   margin-top: 0.5rem;
   display: flex;
   gap: 0.75rem;
 }
 
-.comment-actions button {
+.comment-actions button,
+.comment-actions a {
   font-size: 0.8125rem;
   color: var(--text-tertiary);
+  text-decoration: none;
   transition: color var(--transition-base);
 }
 
-.comment-actions button:hover {
+.comment-actions button:hover,
+.comment-actions a:hover {
   color: var(--accent);
 }
 
-/* Reply / nested comment */
-.comment-reply {
-  margin-left: 2rem;
-  padding-left: 1rem;
-  border-left: 2px solid var(--border-color);
+/* Nested replies (대댓글) */
+.reply-list {
+  margin-top: 0.25rem;
+  padding-left: 3rem;
+}
+
+.reply-list .comment-item {
+  border-bottom: none;
+  padding: 0.75rem 0;
+}
+
+.reply-list .comment-item:first-child {
+  padding-top: 1rem;
+}
+
+.reply-list .comment-avatar {
+  width: 32px;
+  height: 32px;
+}
+
+/* Admin comment highlight */
+.rp_admin > .comment-inner .comment-author::after {
+  content: "관리자";
+  display: inline-block;
+  margin-left: 0.375rem;
+  padding: 0.0625rem 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  line-height: 1.4;
+}
+
+/* Secret comment */
+.rp_secret > .comment-inner .comment-author::after {
+  content: "비밀";
+  display: inline-block;
+  margin-left: 0.375rem;
+  padding: 0.0625rem 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  line-height: 1.4;
+}
+
+/* Hidden secret comment (no read permission) */
+.hiddenComment .comment-body {
+  color: var(--text-tertiary);
+  font-style: italic;
 }
 
 /* Comment form */
 .comment-form {
   margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.comment-form .form-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .comment-form textarea {
@@ -1371,8 +1524,10 @@ pre code::-webkit-scrollbar-thumb:hover {
   min-height: 120px;
   padding: 1rem;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.9375rem;
   resize: vertical;
   line-height: 1.6;
   transition: border-color var(--transition-base),
@@ -1385,12 +1540,6 @@ pre code::-webkit-scrollbar-thumb:hover {
   box-shadow: 0 0 0 3px var(--accent-light);
 }
 
-.comment-form .form-row {
-  display: flex;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
 .comment-form input[type="text"],
 .comment-form input[type="password"] {
   flex: 1;
@@ -1398,36 +1547,63 @@ pre code::-webkit-scrollbar-thumb:hover {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
   transition: border-color var(--transition-base),
     box-shadow var(--transition-base);
 }
 
-.comment-form input:focus {
+.comment-form input[type="text"]:focus,
+.comment-form input[type="password"]:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-light);
 }
 
-.comment-form .btn-submit {
+/* Comment form footer */
+.comment-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.comment-form-footer .secret-check {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.comment-form-footer .secret-check input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+/* Submit button (shared for comment + guestbook) */
+.btn-submit {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 0.75rem;
-  padding: 0.625rem 1.5rem;
+  padding: 0.5rem 1.25rem;
   background-color: var(--accent);
   color: #ffffff;
   font-weight: 600;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
+  border: none;
   border-radius: var(--radius-sm);
+  cursor: pointer;
   transition: background-color var(--transition-base),
     transform var(--transition-fast);
 }
 
-.comment-form .btn-submit:hover {
+.btn-submit:hover {
   background-color: var(--accent-hover);
 }
 
-.comment-form .btn-submit:active {
+.btn-submit:active {
   transform: scale(0.98);
 }
 
@@ -1479,6 +1655,7 @@ pre code::-webkit-scrollbar-thumb:hover {
   color: var(--text-secondary);
   text-decoration: none;
   border-radius: var(--radius-sm);
+  cursor: pointer;
   transition: color var(--transition-base),
     background-color var(--transition-base);
 }
@@ -1607,11 +1784,13 @@ pre code::-webkit-scrollbar-thumb:hover {
 }
 
 .pagination .current,
-.pagination .selected {
+.pagination .selected,
+.pagination a.num:not([href]) {
   color: #ffffff;
   background-color: var(--accent);
   border-color: var(--accent);
   font-weight: 600;
+  pointer-events: none;
 }
 
 .pagination .prev,
@@ -1619,7 +1798,10 @@ pre code::-webkit-scrollbar-thumb:hover {
   font-size: 1rem;
 }
 
-.pagination .disabled {
+.pagination .disabled,
+.pagination .no_more_prev,
+.pagination .no_more_next,
+.pagination a:not([href]):not(.num) {
   color: var(--text-tertiary);
   border-color: var(--border-color);
   opacity: 0.5;
@@ -1676,7 +1858,7 @@ pre code::-webkit-scrollbar-thumb:hover {
   margin-bottom: 0;
 }
 
-.guestbook-reply {
+.guestbook-entry > .comment-reply {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   padding-left: 1rem;
@@ -1708,6 +1890,7 @@ pre code::-webkit-scrollbar-thumb:hover {
 
 .guestbook-form textarea:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
 }
 
 .guestbook-form .form-row {
@@ -1732,24 +1915,20 @@ pre code::-webkit-scrollbar-thumb:hover {
   transition: border-color var(--transition-base);
 }
 
-.guestbook-form input:focus {
+.guestbook-form input[type="text"]:focus,
+.guestbook-form input[type="password"]:focus,
+.guestbook-form input[type="url"]:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
 }
 
-.guestbook-form .btn-submit {
-  padding: 0.5rem 1.5rem;
-  background-color: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color var(--transition-base);
+.guestbook-form input[type="url"] {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
 }
 
-.guestbook-form .btn-submit:hover {
-  background-color: var(--accent-hover);
-}
+/* .btn-submit styles now shared — see comment section */
 
 
 /* --------------------------------------------------------------------------
@@ -2138,7 +2317,7 @@ html.dark .plantuml-diagram img[src$=".svg"] {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.9);
-  z-index: 300;
+  z-index: 310;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2319,6 +2498,7 @@ html.dark .plantuml-diagram img[src$=".svg"] {
   color: var(--text-secondary);
   text-decoration: none;
   border-radius: var(--radius-sm);
+  cursor: pointer;
   transition: color var(--transition-base), background-color var(--transition-base);
 }
 
@@ -2361,6 +2541,41 @@ html.dark .plantuml-diagram img[src$=".svg"] {
 .sidebar-category .tt_category ul ul ul a {
   font-size: 0.75rem;
   color: var(--text-tertiary);
+}
+
+/* Tistory default category tree widget (table-based) */
+.sidebar-category #treeComponent td.branch3 {
+  cursor: pointer;
+}
+
+.sidebar-category #treeComponent td.branch3 div {
+  font-size: 0.875rem;
+  padding: 0.3rem 0.25rem;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-base), background-color var(--transition-base);
+}
+
+.sidebar-category #treeComponent td.branch3:hover div {
+  color: var(--accent) !important;
+  background-color: var(--accent-light);
+}
+
+.sidebar-category #treeComponent .c_cnt {
+  font-size: 0.75rem;
+  color: var(--text-tertiary) !important;
+}
+
+/* Dark mode: override Tistory's inline hardcoded colors */
+html.dark .sidebar-category #treeComponent td.branch3 div {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .sidebar-category #treeComponent table[style*="background-color"] {
+  background-color: transparent !important;
+}
+
+html.dark .sidebar-category #treeComponent .ib {
+  filter: invert(1);
 }
 
 
@@ -2419,6 +2634,10 @@ html.dark .plantuml-diagram img[src$=".svg"] {
   padding: 0.25rem;
   line-height: 1;
   font-size: 1.125rem;
+}
+
+.resume-reading-dismiss:hover {
+  color: var(--text-primary);
 }
 
 
@@ -2615,12 +2834,31 @@ html.dark .plantuml-diagram img[src$=".svg"] {
   }
 
   /* Comments */
-  .comment-reply {
-    margin-left: 1rem;
+  .reply-list {
+    padding-left: 1.5rem;
+  }
+
+  .comment-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .reply-list .comment-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .comment-form {
+    padding: 1rem;
   }
 
   .comment-form .form-row {
     flex-direction: column;
+  }
+
+  .comment-form-footer {
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
 
   /* Pagination */
@@ -2654,6 +2892,10 @@ html.dark .plantuml-diagram img[src$=".svg"] {
     margin-top: 2rem;
     padding: 2rem 0;
   }
+
+  .blog-subtitle {
+    display: none;
+  }
 }
 
 
@@ -2669,10 +2911,13 @@ html.dark .plantuml-diagram img[src$=".svg"] {
   h1 { font-size: 1.5rem; }
   h2 { font-size: 1.25rem; }
 
+  main > .container {
+    padding-top: calc(var(--header-height) + 1.5rem);
+  }
+
   .container {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
-    padding-top: calc(var(--header-height) + 1.5rem);
   }
 
   .header-inner {
@@ -2766,7 +3011,12 @@ html.dark .plantuml-diagram img[src$=".svg"] {
   .post-navigation,
   .comments-section,
   .pagination,
-  .toc {
+  .toc,
+  .reading-progress,
+  .footer,
+  .lightbox,
+  .kbd-overlay,
+  .resume-reading {
     display: none !important;
   }
 
