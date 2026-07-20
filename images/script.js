@@ -1089,7 +1089,76 @@
   }
 
   // --------------------------------------------------
-  // Module 17: Init
+  // Module 17: Recent Posts (from RSS feed)
+  // --------------------------------------------------
+  // Tistory no longer offers a drag-in "recent posts" sidebar module, so the
+  // widget is filled client-side from the blog's same-origin /rss feed.
+  function initRecentPosts() {
+    var widget = document.querySelector('[data-recent-posts]');
+    if (!widget) return;
+    var list = widget.querySelector('.recent-posts');
+    if (!list) return;
+
+    var MAX = 5;
+
+    fetch('/rss').then(function(res) {
+      return res.ok ? res.text() : Promise.reject();
+    }).then(function(text) {
+      var xml = new DOMParser().parseFromString(text, 'text/xml');
+      var items = xml.querySelectorAll('item');
+      if (!items.length) return;
+
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < items.length && i < MAX; i++) {
+        var titleEl = items[i].querySelector('title');
+        var linkEl = items[i].querySelector('link');
+        var dateEl = items[i].querySelector('pubDate');
+        var link = linkEl ? linkEl.textContent : '';
+        if (!link) continue;
+
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = link;
+        // Tistory RSS titles are HTML-entity encoded (e.g. "&middot;"), so decode
+        // before assigning as text. Assigned via textContent — never innerHTML.
+        a.textContent = titleEl ? decodeEntities(titleEl.textContent) : link;
+        li.appendChild(a);
+
+        var date = dateEl ? formatRssDate(dateEl.textContent) : '';
+        if (date) {
+          var span = document.createElement('span');
+          span.className = 'recent-post-date';
+          span.textContent = date;
+          li.appendChild(span);
+        }
+        frag.appendChild(li);
+      }
+
+      if (frag.childNodes.length) {
+        list.appendChild(frag);
+        widget.removeAttribute('hidden');
+      }
+    }).catch(function() { /* RSS unavailable */ });
+  }
+
+  // Decode HTML entities in a string safely (textarea never executes markup)
+  function decodeEntities(str) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = str;
+    return ta.value;
+  }
+
+  // Convert an RSS pubDate (RFC 822) to the skin's YYYY.MM.DD format
+  function formatRssDate(str) {
+    var d = new Date(str);
+    if (isNaN(d.getTime())) return '';
+    var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+    var dd = ('0' + d.getDate()).slice(-2);
+    return d.getFullYear() + '.' + mm + '.' + dd;
+  }
+
+  // --------------------------------------------------
+  // Module 18: Init
   // --------------------------------------------------
   function init() {
     initSkinVariables();
@@ -1108,6 +1177,7 @@
     initLightbox();
     initKeyboardShortcuts();
     initReadingPosition();
+    initRecentPosts();
   }
 
   document.addEventListener('DOMContentLoaded', init);
