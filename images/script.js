@@ -746,6 +746,20 @@
   function initSkinVariables() {
     var body = document.body;
 
+    // Profile widget: reveal only when a profile image is actually configured.
+    // Unconfigured blogs get an empty src (or the raw [##_..._##] placeholder
+    // when viewed outside Tistory), so the whole block is removed in that case.
+    var profileWidget = document.querySelector('[data-profile]');
+    if (profileWidget) {
+      var profileImg = profileWidget.querySelector('img');
+      var src = profileImg ? (profileImg.getAttribute('src') || '') : '';
+      if (src && src.indexOf('[##_') === -1) {
+        profileWidget.removeAttribute('hidden');
+      } else {
+        profileWidget.parentNode.removeChild(profileWidget);
+      }
+    }
+
     // Layout style: list or grid
     var layout = body.getAttribute('data-layout');
     if (layout === 'grid') {

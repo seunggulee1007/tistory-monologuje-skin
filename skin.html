@@ -425,6 +425,15 @@
            SIDEBAR
            ======================================================== -->
       <div class="sidebar" role="complementary" aria-label="사이드바">
+        <!-- Profile (revealed by JS only when a profile image is set in skin settings) -->
+        <div class="sidebar-widget" data-profile hidden>
+          <div class="sidebar-profile">
+            <img src="[##_var_profile_image_##]" alt="[##_var_profile_name_##]">
+            <div class="profile-name">[##_var_profile_name_##]</div>
+            <p class="profile-desc">[##_var_profile_desc_##]</p>
+          </div>
+        </div>
+
         <!-- Category navigation (always visible) -->
         <div class="sidebar-widget sidebar-category">
           <h3 class="sidebar-widget-title">카테고리</h3>
