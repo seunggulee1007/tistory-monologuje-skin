@@ -7,46 +7,73 @@
   // ============================================================
 
   // --------------------------------------------------
+  // Shared helpers
+  // --------------------------------------------------
+  // highlight.js CDN + theme name resolution (single source of truth)
+  var HLJS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/';
+  var HLJS_THEMES = {
+    'github':   { light: 'github',          dark: 'github-dark' },
+    'atom-one': { light: 'atom-one-light',  dark: 'atom-one-dark' },
+    'monokai':  { light: 'monokai',         dark: 'monokai' }
+  };
+
+  function hljsThemeUrl(codeTheme, isDark) {
+    var t = HLJS_THEMES[codeTheme] || HLJS_THEMES.github;
+    return HLJS_CDN + (isDark ? t.dark : t.light) + '.min.css';
+  }
+
+  // Copy text to clipboard using the modern API with a textarea fallback
+  function copyText(text, onDone) {
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (onDone) onDone();
+      } catch (_) { /* copy not supported */ }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        if (onDone) onDone();
+      }).catch(fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  // --------------------------------------------------
   // Module 1: Dark Mode Toggle
   // --------------------------------------------------
   function initDarkMode() {
     var toggle = document.querySelector('.dark-toggle');
     var themeLink = document.getElementById('hljs-theme');
     var STORAGE_KEY = 'monolog-theme';
-    var CDN = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/';
 
     // Resolve hljs theme URLs based on code_theme skin variable
     var codeTheme = document.body.getAttribute('data-code-theme') || 'github';
-    var themeNames = {
-      'github':   { light: 'github',         dark: 'github-dark' },
-      'atom-one': { light: 'atom-one-light',  dark: 'atom-one-dark' },
-      'monokai':  { light: 'monokai',         dark: 'monokai' }
-    };
-    var resolved = themeNames[codeTheme] || themeNames['github'];
-    var LIGHT_THEME = CDN + resolved.light + '.min.css';
-    var DARK_THEME = CDN + resolved.dark + '.min.css';
 
     function applyTheme(mode) {
-      if (mode === 'dark') {
-        document.documentElement.classList.add('dark');
-        if (themeLink) themeLink.href = DARK_THEME;
-      } else {
-        document.documentElement.classList.remove('dark');
-        if (themeLink) themeLink.href = LIGHT_THEME;
-      }
+      var isDark = mode === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      if (themeLink) themeLink.href = hljsThemeUrl(codeTheme, isDark);
     }
 
     function getCurrentTheme() {
       return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     }
 
-    // Apply saved preference or OS preference on load
+    // Apply saved preference or OS preference on load.
+    // Always call applyTheme so the hljs stylesheet matches the resolved
+    // code_theme even for the light/github default (no other module touches it).
     var saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      applyTheme(saved);
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      applyTheme('dark');
-    }
+    var startDark = saved
+      ? saved === 'dark'
+      : !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    applyTheme(startDark ? 'dark' : 'light');
 
     // Toggle button click
     if (toggle) {
@@ -315,31 +342,9 @@
 
     function createCopyHandler(codeEl, btn) {
       return function() {
-        var text = codeEl.textContent;
         var spanEl = btn.querySelector('span');
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(function() {
-            showCopied(spanEl);
-          }).catch(function() {
-            fallbackCopy(text, spanEl);
-          });
-        } else {
-          fallbackCopy(text, spanEl);
-        }
+        copyText(codeEl.textContent, function() { showCopied(spanEl); });
       };
-    }
-
-    function fallbackCopy(text, spanEl) {
-      try {
-        var ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        showCopied(spanEl);
-      } catch (_) { /* copy not supported */ }
     }
 
     function showCopied(spanEl) {
@@ -762,23 +767,8 @@
       if (tocEl) tocEl.style.display = 'none';
     }
 
-    // Code theme: swap hljs stylesheet based on theme name
-    var codeTheme = body.getAttribute('data-code-theme');
-    if (codeTheme && codeTheme !== 'github') {
-      var themeMap = {
-        'atom-one': { light: 'atom-one-light', dark: 'atom-one-dark' },
-        'monokai': { light: 'monokai', dark: 'monokai' }
-      };
-      var mapped = themeMap[codeTheme];
-      if (mapped) {
-        var themeLink = document.getElementById('hljs-theme');
-        if (themeLink) {
-          var isDark = document.documentElement.classList.contains('dark');
-          var themeName = isDark ? mapped.dark : mapped.light;
-          themeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/' + themeName + '.min.css';
-        }
-      }
-    }
+    // Code theme (hljs stylesheet) is resolved and applied in initDarkMode,
+    // which owns the single source of truth for theme URLs.
 
     // Cover image
     var coverImage = body.getAttribute('data-cover-image');
@@ -874,19 +864,7 @@
       return function(e) {
         e.preventDefault();
         var url = window.location.origin + window.location.pathname + '#' + id;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(url).then(function() { showToast(toastEl); });
-        } else {
-          // fallback
-          var ta = document.createElement('textarea');
-          ta.value = url;
-          ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          showToast(toastEl);
-        }
+        copyText(url, function() { showToast(toastEl); });
         // Also update URL hash
         history.replaceState(null, '', '#' + id);
       };
