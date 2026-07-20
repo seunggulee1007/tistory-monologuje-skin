@@ -2565,12 +2565,12 @@ html.dark .plantuml-diagram img[src$=".svg"] {
   color: var(--text-tertiary) !important;
 }
 
-/* Hide Tistory's default decorative tree icons (folder, leaf, new-post badge)
-   for a clean text list. Expand/collapse toggles (tab_plus/tab_minus) are left
-   untouched so collapsible category trees keep working. */
+/* Hide Tistory's decorative tree icons (root folder, leaf markers) for a clean
+   text list. The new-post "N" badge (new_ico) is kept — it conveys information —
+   and expand/collapse toggles (tab_plus/tab_minus) are left untouched so
+   collapsible category trees keep working. */
 .sidebar-category #treeComponent img[src*="tab_top"],
-.sidebar-category #treeComponent img[src*="tab_isleaf"],
-.sidebar-category #treeComponent img[src*="new_ico"] {
+.sidebar-category #treeComponent img[src*="tab_isleaf"] {
   display: none !important;
 }
 
