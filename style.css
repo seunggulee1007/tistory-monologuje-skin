@@ -1113,7 +1113,7 @@ pre code::-webkit-scrollbar-thumb:hover {
 .toc-link {
   display: block;
   font-size: 0.875rem;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-decoration: none;
   padding: 0.3rem 0 0.3rem 0.75rem;
   border-left: 2px solid transparent;
@@ -1123,7 +1123,7 @@ pre code::-webkit-scrollbar-thumb:hover {
 }
 
 .toc-link:hover {
-  color: var(--text-secondary);
+  color: var(--text-primary);
   text-decoration: none;
 }
 
@@ -2563,6 +2563,15 @@ html.dark .plantuml-diagram img[src$=".svg"] {
 .sidebar-category #treeComponent .c_cnt {
   font-size: 0.75rem;
   color: var(--text-tertiary) !important;
+}
+
+/* Hide Tistory's default decorative tree icons (folder, leaf, new-post badge)
+   for a clean text list. Expand/collapse toggles (tab_plus/tab_minus) are left
+   untouched so collapsible category trees keep working. */
+.sidebar-category #treeComponent img[src*="tab_top"],
+.sidebar-category #treeComponent img[src*="tab_isleaf"],
+.sidebar-category #treeComponent img[src*="new_ico"] {
+  display: none !important;
 }
 
 /* Dark mode: override Tistory's inline hardcoded colors */
