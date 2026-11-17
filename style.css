@@ -1113,7 +1113,7 @@ pre code::-webkit-scrollbar-thumb:hover {
 .toc-link {
   display: block;
   font-size: 0.875rem;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-decoration: none;
   padding: 0.3rem 0 0.3rem 0.75rem;
   border-left: 2px solid transparent;
@@ -1123,7 +1123,7 @@ pre code::-webkit-scrollbar-thumb:hover {
 }
 
 .toc-link:hover {
-  color: var(--text-secondary);
+  color: var(--text-primary);
   text-decoration: none;
 }
 
@@ -1196,6 +1196,7 @@ pre code::-webkit-scrollbar-thumb:hover {
 
 .post-tags {
   display: flex;
+  font-size: 0;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin: 2rem 0;
@@ -2563,6 +2564,15 @@ html.dark .plantuml-diagram img[src$=".svg"] {
 .sidebar-category #treeComponent .c_cnt {
   font-size: 0.75rem;
   color: var(--text-tertiary) !important;
+}
+
+/* Hide Tistory's decorative tree icons (root folder, leaf markers) for a clean
+   text list. The new-post "N" badge (new_ico) is kept — it conveys information —
+   and expand/collapse toggles (tab_plus/tab_minus) are left untouched so
+   collapsible category trees keep working. */
+.sidebar-category #treeComponent img[src*="tab_top"],
+.sidebar-category #treeComponent img[src*="tab_isleaf"] {
+  display: none !important;
 }
 
 /* Dark mode: override Tistory's inline hardcoded colors */

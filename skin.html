@@ -206,16 +206,14 @@
                 <!-- Tags -->
                 <s_tag_label>
                   <div class="post-tags">
-                    <s_tag_label_rep>
-                      <a href="[##_tag_link_##]">[##_tag_name_##]</a>
-                    </s_tag_label_rep>
+                    [##_tag_label_rep_##]
                   </div>
                 </s_tag_label>
 
                 <!-- Prev / Next navigation -->
                 <nav class="post-navigation" aria-label="이전/다음 글">
                   <s_article_prev>
-                    <a href="[##_prev_link_##]" class="post-nav-item">
+                    <a href="[##_article_prev_link_##]" class="post-nav-item">
                       <span class="post-nav-label">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                           <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -223,11 +221,11 @@
                         </svg>
                         이전 글
                       </span>
-                      <span class="post-nav-title">[##_prev_title_##]</span>
+                      <span class="post-nav-title">[##_article_prev_title_##]</span>
                     </a>
                   </s_article_prev>
                   <s_article_next>
-                    <a href="[##_next_link_##]" class="post-nav-item next">
+                    <a href="[##_article_next_link_##]" class="post-nav-item next">
                       <span class="post-nav-label">
                         다음 글
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -235,7 +233,7 @@
                           <polyline points="12 5 19 12 12 19"></polyline>
                         </svg>
                       </span>
-                      <span class="post-nav-title">[##_next_title_##]</span>
+                      <span class="post-nav-title">[##_article_next_title_##]</span>
                     </a>
                   </s_article_next>
                 </nav>
@@ -425,10 +423,25 @@
            SIDEBAR
            ======================================================== -->
       <div class="sidebar" role="complementary" aria-label="사이드바">
+        <!-- Profile (revealed by JS only when a profile image is set in skin settings) -->
+        <div class="sidebar-widget" data-profile hidden>
+          <div class="sidebar-profile">
+            <img src="[##_var_profile_image_##]" alt="[##_var_profile_name_##]">
+            <div class="profile-name">[##_var_profile_name_##]</div>
+            <p class="profile-desc">[##_var_profile_desc_##]</p>
+          </div>
+        </div>
+
         <!-- Category navigation (always visible) -->
         <div class="sidebar-widget sidebar-category">
           <h3 class="sidebar-widget-title">카테고리</h3>
           [##_category_##]
+        </div>
+
+        <!-- Recent posts (populated by JS from the blog RSS feed) -->
+        <div class="sidebar-widget" data-recent-posts hidden>
+          <h3 class="sidebar-widget-title">최근 글</h3>
+          <ul class="recent-posts"></ul>
         </div>
 
         <s_sidebar>

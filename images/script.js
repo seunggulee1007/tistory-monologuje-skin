@@ -7,46 +7,73 @@
   // ============================================================
 
   // --------------------------------------------------
+  // Shared helpers
+  // --------------------------------------------------
+  // highlight.js CDN + theme name resolution (single source of truth)
+  var HLJS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/';
+  var HLJS_THEMES = {
+    'github':   { light: 'github',          dark: 'github-dark' },
+    'atom-one': { light: 'atom-one-light',  dark: 'atom-one-dark' },
+    'monokai':  { light: 'monokai',         dark: 'monokai' }
+  };
+
+  function hljsThemeUrl(codeTheme, isDark) {
+    var t = HLJS_THEMES[codeTheme] || HLJS_THEMES.github;
+    return HLJS_CDN + (isDark ? t.dark : t.light) + '.min.css';
+  }
+
+  // Copy text to clipboard using the modern API with a textarea fallback
+  function copyText(text, onDone) {
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (onDone) onDone();
+      } catch (_) { /* copy not supported */ }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        if (onDone) onDone();
+      }).catch(fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  // --------------------------------------------------
   // Module 1: Dark Mode Toggle
   // --------------------------------------------------
   function initDarkMode() {
     var toggle = document.querySelector('.dark-toggle');
     var themeLink = document.getElementById('hljs-theme');
     var STORAGE_KEY = 'monolog-theme';
-    var CDN = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/';
 
     // Resolve hljs theme URLs based on code_theme skin variable
     var codeTheme = document.body.getAttribute('data-code-theme') || 'github';
-    var themeNames = {
-      'github':   { light: 'github',         dark: 'github-dark' },
-      'atom-one': { light: 'atom-one-light',  dark: 'atom-one-dark' },
-      'monokai':  { light: 'monokai',         dark: 'monokai' }
-    };
-    var resolved = themeNames[codeTheme] || themeNames['github'];
-    var LIGHT_THEME = CDN + resolved.light + '.min.css';
-    var DARK_THEME = CDN + resolved.dark + '.min.css';
 
     function applyTheme(mode) {
-      if (mode === 'dark') {
-        document.documentElement.classList.add('dark');
-        if (themeLink) themeLink.href = DARK_THEME;
-      } else {
-        document.documentElement.classList.remove('dark');
-        if (themeLink) themeLink.href = LIGHT_THEME;
-      }
+      var isDark = mode === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      if (themeLink) themeLink.href = hljsThemeUrl(codeTheme, isDark);
     }
 
     function getCurrentTheme() {
       return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     }
 
-    // Apply saved preference or OS preference on load
+    // Apply saved preference or OS preference on load.
+    // Always call applyTheme so the hljs stylesheet matches the resolved
+    // code_theme even for the light/github default (no other module touches it).
     var saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      applyTheme(saved);
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      applyTheme('dark');
-    }
+    var startDark = saved
+      ? saved === 'dark'
+      : !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    applyTheme(startDark ? 'dark' : 'light');
 
     // Toggle button click
     if (toggle) {
@@ -315,31 +342,9 @@
 
     function createCopyHandler(codeEl, btn) {
       return function() {
-        var text = codeEl.textContent;
         var spanEl = btn.querySelector('span');
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(function() {
-            showCopied(spanEl);
-          }).catch(function() {
-            fallbackCopy(text, spanEl);
-          });
-        } else {
-          fallbackCopy(text, spanEl);
-        }
+        copyText(codeEl.textContent, function() { showCopied(spanEl); });
       };
-    }
-
-    function fallbackCopy(text, spanEl) {
-      try {
-        var ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        showCopied(spanEl);
-      } catch (_) { /* copy not supported */ }
     }
 
     function showCopied(spanEl) {
@@ -741,6 +746,20 @@
   function initSkinVariables() {
     var body = document.body;
 
+    // Profile widget: reveal only when a profile image is actually configured.
+    // Unconfigured blogs get an empty src (or the raw [##_..._##] placeholder
+    // when viewed outside Tistory), so the whole block is removed in that case.
+    var profileWidget = document.querySelector('[data-profile]');
+    if (profileWidget) {
+      var profileImg = profileWidget.querySelector('img');
+      var src = profileImg ? (profileImg.getAttribute('src') || '') : '';
+      if (src && src.indexOf('[##_') === -1) {
+        profileWidget.removeAttribute('hidden');
+      } else {
+        profileWidget.parentNode.removeChild(profileWidget);
+      }
+    }
+
     // Layout style: list or grid
     var layout = body.getAttribute('data-layout');
     if (layout === 'grid') {
@@ -762,23 +781,8 @@
       if (tocEl) tocEl.style.display = 'none';
     }
 
-    // Code theme: swap hljs stylesheet based on theme name
-    var codeTheme = body.getAttribute('data-code-theme');
-    if (codeTheme && codeTheme !== 'github') {
-      var themeMap = {
-        'atom-one': { light: 'atom-one-light', dark: 'atom-one-dark' },
-        'monokai': { light: 'monokai', dark: 'monokai' }
-      };
-      var mapped = themeMap[codeTheme];
-      if (mapped) {
-        var themeLink = document.getElementById('hljs-theme');
-        if (themeLink) {
-          var isDark = document.documentElement.classList.contains('dark');
-          var themeName = isDark ? mapped.dark : mapped.light;
-          themeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/' + themeName + '.min.css';
-        }
-      }
-    }
+    // Code theme (hljs stylesheet) is resolved and applied in initDarkMode,
+    // which owns the single source of truth for theme URLs.
 
     // Cover image
     var coverImage = body.getAttribute('data-cover-image');
@@ -874,19 +878,7 @@
       return function(e) {
         e.preventDefault();
         var url = window.location.origin + window.location.pathname + '#' + id;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(url).then(function() { showToast(toastEl); });
-        } else {
-          // fallback
-          var ta = document.createElement('textarea');
-          ta.value = url;
-          ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          showToast(toastEl);
-        }
+        copyText(url, function() { showToast(toastEl); });
         // Also update URL hash
         history.replaceState(null, '', '#' + id);
       };
@@ -1097,7 +1089,76 @@
   }
 
   // --------------------------------------------------
-  // Module 17: Init
+  // Module 17: Recent Posts (from RSS feed)
+  // --------------------------------------------------
+  // Tistory no longer offers a drag-in "recent posts" sidebar module, so the
+  // widget is filled client-side from the blog's same-origin /rss feed.
+  function initRecentPosts() {
+    var widget = document.querySelector('[data-recent-posts]');
+    if (!widget) return;
+    var list = widget.querySelector('.recent-posts');
+    if (!list) return;
+
+    var MAX = 5;
+
+    fetch('/rss').then(function(res) {
+      return res.ok ? res.text() : Promise.reject();
+    }).then(function(text) {
+      var xml = new DOMParser().parseFromString(text, 'text/xml');
+      var items = xml.querySelectorAll('item');
+      if (!items.length) return;
+
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < items.length && i < MAX; i++) {
+        var titleEl = items[i].querySelector('title');
+        var linkEl = items[i].querySelector('link');
+        var dateEl = items[i].querySelector('pubDate');
+        var link = linkEl ? linkEl.textContent : '';
+        if (!link) continue;
+
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = link;
+        // Tistory RSS titles are HTML-entity encoded (e.g. "&middot;"), so decode
+        // before assigning as text. Assigned via textContent — never innerHTML.
+        a.textContent = titleEl ? decodeEntities(titleEl.textContent) : link;
+        li.appendChild(a);
+
+        var date = dateEl ? formatRssDate(dateEl.textContent) : '';
+        if (date) {
+          var span = document.createElement('span');
+          span.className = 'recent-post-date';
+          span.textContent = date;
+          li.appendChild(span);
+        }
+        frag.appendChild(li);
+      }
+
+      if (frag.childNodes.length) {
+        list.appendChild(frag);
+        widget.removeAttribute('hidden');
+      }
+    }).catch(function() { /* RSS unavailable */ });
+  }
+
+  // Decode HTML entities in a string safely (textarea never executes markup)
+  function decodeEntities(str) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = str;
+    return ta.value;
+  }
+
+  // Convert an RSS pubDate (RFC 822) to the skin's YYYY.MM.DD format
+  function formatRssDate(str) {
+    var d = new Date(str);
+    if (isNaN(d.getTime())) return '';
+    var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+    var dd = ('0' + d.getDate()).slice(-2);
+    return d.getFullYear() + '.' + mm + '.' + dd;
+  }
+
+  // --------------------------------------------------
+  // Module 18: Init
   // --------------------------------------------------
   function init() {
     initSkinVariables();
@@ -1116,6 +1177,7 @@
     initLightbox();
     initKeyboardShortcuts();
     initReadingPosition();
+    initRecentPosts();
   }
 
   document.addEventListener('DOMContentLoaded', init);

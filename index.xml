@@ -114,6 +114,30 @@
       <default>개발과 일상을 기록합니다</default>
       <description>블로그 부제</description>
     </variable>
+
+    <variable>
+      <name>profile_image</name>
+      <label>프로필 이미지</label>
+      <type>IMAGE</type>
+      <default></default>
+      <description>사이드바 프로필 이미지 (비워두면 프로필 영역이 표시되지 않습니다)</description>
+    </variable>
+
+    <variable>
+      <name>profile_name</name>
+      <label>프로필 이름</label>
+      <type>STRING</type>
+      <default></default>
+      <description>사이드바 프로필 이름</description>
+    </variable>
+
+    <variable>
+      <name>profile_desc</name>
+      <label>프로필 소개</label>
+      <type>STRING</type>
+      <default></default>
+      <description>사이드바 프로필 소개글</description>
+    </variable>
   </variables>
 
   <default>
