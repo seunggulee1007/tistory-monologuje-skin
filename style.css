@@ -1196,6 +1196,7 @@ pre code::-webkit-scrollbar-thumb:hover {
 
 .post-tags {
   display: flex;
+  font-size: 0;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin: 2rem 0;
